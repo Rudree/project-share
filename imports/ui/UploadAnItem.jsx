@@ -1,7 +1,7 @@
 import React from 'react';
 import { createContainer } from 'meteor/react-meteor-data';
 import { ItemCollection } from '../collections/items.js';
-import { Header, Card, Input, Icon, Image, Button, Divider, Form, Segment } from 'semantic-ui-react'
+import { Header, Card, Input, Icon, Image, Button, Divider, Form, Segment } from 'semantic-ui-react';
 
 class UploadItemPage extends React.Component {
 
@@ -12,6 +12,7 @@ class UploadItemPage extends React.Component {
     var CurrentDate = new Date();
     this.state = 
     {
+      user :Session.get('user'),
       ItemName: 'Tool Name',
       ItemDescription: 'This is a tool for testing the web app !!',
       ItemPrice : 'Free',
@@ -57,7 +58,6 @@ class UploadItemPage extends React.Component {
    render() {
       return (
          <div>
-
           <Segment.Group>
           <Segment>
           <Header as='h2'>

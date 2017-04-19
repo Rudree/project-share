@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { createContainer } from 'meteor/react-meteor-data';
-import { Table } from 'semantic-ui-react'
+import { Table, Card, Image, Divider, Button} from 'semantic-ui-react'
 
 const colors = [
   'teal'
@@ -14,7 +14,36 @@ class ItemAPI extends React.Component {
       renderItemsList ()
       {
              return this.props.items.map((item) => (
-             <Item key={item._id} item={item} />
+               <div key={item._id}> 
+           <Card>
+            <Image src='https://s-media-cache-ak0.pinimg.com/736x/54/7a/9c/547a9cc6b93e10261f1dd8a8af474e03.jpg' />
+            <Card.Content>
+              <Card.Header>
+              {item.itemName}
+              </Card.Header>
+              <Card.Description>{item.itemDescription}</Card.Description>
+              <Divider/>
+           
+                <span className='date'>
+                  Uploaded on : {item.itemPrice}
+                </span>
+                <Divider/>
+                <span >
+                  Price : {item.itemPrice}
+                  </span>
+                <Divider/>
+                 <span>
+                  Owner : {item.itemOwner}
+                  </span>
+               </Card.Content>
+            <Card.Content extra>
+                <div className='ui two buttons'>
+                  <Button icon='add to cart' basic color='green' content='Borrow'></Button>
+                  <Button icon='talk outline' basic color='blue' content='Message  Owner'></Button>
+                </div>
+            </Card.Content>
+          </Card>
+          </div>
       ));
       }
 

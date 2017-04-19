@@ -1,15 +1,11 @@
-import React, {Component, PropTypes, Props} from 'react';
-import {
-  BrowserRouter as Router,
-  Route,
-  Link
-} from 'react-router-dom'
-import { browserHistory  } from 'react-router'
-import { Icon, Menu, Segment } from 'semantic-ui-react'
+import React, { Component, PropTypes, Props } from 'react';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
+import { Icon, Menu, Segment, Dropdown } from 'semantic-ui-react';
+import { Session } from 'meteor/session';
 
 class HeadNavBar extends React.Component {
 
- constructor() {
+  constructor() {
     super();
     this.RedirectHome = this.RedirectHome.bind(this);
     this.RedirectLogin = this.RedirectLogin.bind(this);
@@ -19,72 +15,88 @@ class HeadNavBar extends React.Component {
 
   }
 
-    RedirectHome(event,{name}) {
+  RedirectHome(event, { name }) {
     event.preventDefault();
-    this.props.history.push('/home');
-    }
+    browserHistory.push('#/home');
+  }
 
-    RedirectLogin(event,{name}) {
+  RedirectLogin(event, { name }) {
     event.preventDefault();
-    this.props.history.push('/login');
-    }
+    browserHistory.push('/login');
+  }
 
-    RedirectRegister(event,{name}) {
+  RedirectRegister(event, { name }) {
     event.preventDefault();
-    this.props.history.push('/register');
-    }
+    browserHistory.push('/register');
+  }
 
-    RedirectUploaditem(event,{name}) {
+  RedirectUploaditem(event, { name }) {
     event.preventDefault();
-    this.props.history.push('/uploaditem');
-    }
-  
-    RedirectManageitem(event,{name}) {
-    event.preventDefault();
-    this.props.history.push('/manageitem');
-    }
+    browserHistory.push('/uploaditem');
+  }
 
-   render() {
-      return (
-               <header>
-            <Segment size='huge' raised>
-           <Menu size='huge' color={'green'} inverted widths={5}>
-            <Menu.Item name='Home'  onClick={this.RedirectHome}  >
+  RedirectManageitem(event, { name }) {
+    event.preventDefault();
+    browserHistory.push('/manageitem');
+  }
+
+  RedirectLogout(event, { name }) {
+    event.preventDefault();
+    Meteor.logout();
+    hashHistory.push('/home');
+  }
+
+  render() {
+    var user = Session.get('user');
+    console.log(user);
+    return (
+      <header>
+        <Segment size='huge' raised>
+          <Menu size='huge' color={'green'} inverted>
+            <Menu.Item name='Home' href="#/home" >
               <Icon name='home' />
               Home
             </Menu.Item>
-            <Menu.Item name='Login' onClick={this.RedirectLogin}>
-              <Icon name='sign in' />
-              Login
+            {!user ?
+              <Menu.Menu position='right'>
+                <Menu.Item name="user" href="#/login">
+                  <Icon name='sign in' />
+                  Login
             </Menu.Item>
 
-            <Menu.Item name='Register' onClick={this.RedirectRegister}>
-              <Icon name='users' />
-              Register
+                <Menu.Item name='Register' href="#/register">
+                  <Icon name='users' />
+                  Register
             </Menu.Item>
+              </Menu.Menu>
+              : ""}
 
-            <Menu.Item name='Upload Item' onClick={this.RedirectUploaditem}>
-              <Icon name='plus' />
-              Upload Item
-            </Menu.Item>
-            <Menu.Item name='Manage Items' onClick={this.RedirectManageitem}>
-              <Icon name='database' />
-              Manage Items
-            </Menu.Item>
+            {user ?
+              <Menu.Menu position='right'>
+                <Dropdown item text={user.username}>
+                  <Dropdown.Menu>
+                    <Dropdown.Item name='Upload Item' href="#/uploaditem">Upload Item</Dropdown.Item>
+                    <Dropdown.Item name='Manage Items' href="#/manageitem">Manage Items</Dropdown.Item>
+                    <Dropdown.Item name='Logout' onClick={this.RedirectLogout}>Logout</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Menu.Menu>
+              : ""}
+
           </Menu>
-          </Segment>
-       </header>
-      );
-   }
+        </Segment>
+      </header>
+    );
+  }
 }
 
 export default HeadNavBar;
 
-      
-      
-      
-      
-      
-      
-      
-      
+
+
+
+
+
+
+
+

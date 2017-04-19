@@ -1,117 +1,159 @@
-import React from 'react';
-import {Form, FormGroup, FormControl } from 'semantic-ui-react'
+import React, { Component, PropTypes } from 'react';
+import { hashHistory, Link } from 'react-router';
+import { Header, Message, Card, Input, Icon, Image, Button, Divider, Form, Segment, Modal } from 'semantic-ui-react';
+import { Accounts } from 'meteor/accounts-base';
+import { Session } from 'meteor/session';
 
-class RegistrationPage extends React.Component {
+export default class RegistrationPage extends Component {
 
   constructor(props) {
     super(props);
 
     this.state =
       {
-        user: null,
+        modalOpen: false,
+        message: "",
+        error: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: ""
       }
   };
 
   render() {
-       console.log(this.state);
-    let { user } = this.state;
+    let { firstName, lastName, email, username, password, error, message } = this.state;
     return (
+      <div>
+        <Segment.Group compact>
+          <Segment>
+            <Header as='h2'>
+              <Icon name='save' />
+              <Header.Content>
+                User Registration
+            </Header.Content>
+            </Header>
+          </Segment>
 
-      <Form horizontal>
-        <FormGroup controlId="formHorizontalFirstName">
-          <Col componentClass={ControlLabel} sm={2}>
-            First Name
-              </Col>
-          <Col sm={6}>
-            <FormControl type="text" value={this.state.firstName} onChange={this.onFirstNameChange.bind(this)} />
-          </Col>
-        </FormGroup>
+          <Segment.Group horizontal compact>
+            <Segment inverted color='green' raised circular>
 
-        <FormGroup controlId="formHorizontalLastName">
-          <Col componentClass={ControlLabel} sm={2}>
-            Last Name
-              </Col>
-          <Col sm={6}>
-            <FormControl type="text" value={this.state.firstName} onChange={this.onLastNameChange.bind(this)} />
-          </Col>
-        </FormGroup>
+              {error.length > 0 ?
+                <Message negative>
+                  <Message.Header>Error!</Message.Header>
+                  <p>{error}</p>
+                </Message>
+                : ''}
 
-        <FormGroup controlId="formHorizontalEmail">
-          <Col componentClass={ControlLabel} sm={2}>
-            Email
-              </Col>
-          <Col sm={6}>
-            <FormControl type="email" value={this.state.email} onChange={this.onEmailChange.bind(this)} />
-          </Col>
-        </FormGroup>
+              <Form inverted size='small'>
+                <Form.Field>
+                  <label>First Name</label>
+                  <Input type="text" value={this.state.firstName} onChange={this.onFirstNameChange.bind(this)} />
+                </Form.Field>
 
-        <FormGroup controlId="formHorizontalUsername">
-          <Col componentClass={ControlLabel} sm={2}>
-            Username
-              </Col>
-          <Col sm={6}>
-            <FormControl type="text" value={this.state.email} onChange={this.onUsernameChange.bind(this)} />
-          </Col>
-        </FormGroup>
+                <Divider hidden />
 
-        <FormGroup controlId="formHorizontalPassword">
-          <Col componentClass={ControlLabel} sm={2}>
-            Password
-              </Col>
-          <Col sm={6}>
-            <FormControl type="password" placeholder="Password" onChange={this.onPasswordChange.bind(this)} />
-          </Col>
-        </FormGroup>
+                <Form.Field>
+                  <label>Last Name</label>
+                  <Input type="text" value={this.state.lastName} onChange={this.onLastNameChange.bind(this)} />
+                </Form.Field>
 
-        <FormGroup>
-          <Col smOffset={2} sm={6}>
-            <Button bsStyle="primary" type="submit">
-              Sign On
-              </Button>
-          </Col>
-        </FormGroup>
-      </Form>
+                <Divider hidden />
+
+                <Form.Field>
+                  <label>Email</label>
+                  <Input type="text" value={this.state.email} onChange={this.onEmailChange.bind(this)} />
+                </Form.Field>
+
+                <Divider hidden />
+
+                <Form.Field>
+                  <label>Username</label>
+                  <Input type="text" value={this.state.username} onChange={this.onUsernameChange.bind(this)} />
+                </Form.Field>
+
+                <Divider hidden />
+
+                <Form.Field>
+                  <label>Password</label>
+                  <Input type="password" value={this.state.Password} onChange={this.onPasswordChange.bind(this)} />
+                </Form.Field>
+              </Form>
+              <Divider hidden />
+              <Button icon='save' color='blue' content='Sign On' onClick={this.onSubmit.bind(this)} />
+
+            </Segment>
+          </Segment.Group>
+        </Segment.Group>
+      </div>
     );
   }
+
 
   onFirstNameChange(e) {
     let firstName = e.target.value;
     this.setState({ firstName: firstName });
-    let user = Object.assign({}, user, { firstName });
-    this.setState({ user });
   }
 
   onLastNameChange(e) {
     let lastName = e.target.value;
     this.setState({ lastName: lastName });
-    let user = Object.assign({},user, { lastName });
-    this.setState({ user });
   }
 
   onEmailChange(e) {
     let email = e.target.value;
     this.setState({ email: email });
-    let user = Object.assign({},user, { email });
-    this.setState({ user });
   }
 
   onUsernameChange(e) {
     let username = e.target.value;
     this.setState({ username: username });
-    let user = Object.assign({}, user, { username });
-    this.setState({ user });
   }
 
   onPasswordChange(e) {
     let password = e.target.value;
     this.setState({ password: password });
-    let user = Object.assign({}, user, { password });
-    this.setState({ user });
-  }
-  onsubmit(e) {
-    
   }
 
+  onSubmit(e) {
+    e.preventDefault();
+
+    var user = {
+      email: this.state.email,
+      username: this.state.username,
+      password: this.state.password,
+      profile: {
+        firstName: this.state.firstName,
+        lastName: this.state.lastName
+      }
+    };
+
+
+    Accounts.createUser({
+      email: this.state.email,
+      username: this.state.username,
+      password: this.state.password,
+      profile: {
+        firstName: this.state.firstName,
+        lastName: this.state.lastName
+      }
+    }, (err) => {
+      if (err) {
+        this.setState({
+          error: err.reason
+        });
+      } else {
+        var userId = Meteor.userId();
+        Meteor.call('serverVerifyEmail', this.state.email, userId, function () {
+          console.log("Verification Email Sent");
+          if (Meteor.user()) {
+            Session.set('user', Meteor.user());
+          }
+          hashHistory.push('/check-email');
+        });
+      }
+    });
+
+  }
 }
-
-export default RegistrationPage;
